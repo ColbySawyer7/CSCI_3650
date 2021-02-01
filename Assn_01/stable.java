@@ -52,6 +52,13 @@ public class stable {
     // ===================================================
     // Wedding (Add to Seperate Marriage Array)
     // ===================================================
+    private static Man addMan(String name, String[] pref){
+        return new Man(name, pref);
+    }
+
+    // ===================================================
+    // Wedding (Add to Seperate Marriage Array)
+    // ===================================================
     public static void wedding(String man, String woman) {
         // marriage[marriage.length] = "Man: " + man + " Woman: " + woman;
     }
@@ -96,7 +103,7 @@ public class stable {
                 }
                 // Debug
                 System.out.println("Man Created: " + fullLine[0]);
-                boyList.add(new Man(fullLine[0], preferences));
+                boyList.add(addMan(fullLine[0], preferences));
             }
             if(boyCount > 100){
                 System.out.println("ERROR: MORE THAN MAX MEMBERS (100)");

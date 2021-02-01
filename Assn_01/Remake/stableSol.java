@@ -1,14 +1,57 @@
 import java.util.*;
-public class StableMarriage {
-    public static void main(String[] args) {
-        System.out.print("How many pairs would you like to match up? ");
-        Scanner input = new Scanner (System.in);
-        int NUMBER_OF_COUPLES = input.nextInt();                
-        System.out.println();
-        LinkedList eligibleMen = createEligibleMen(NUMBER_OF_COUPLES);                
-        System.out.println();LinkedList eligibleWomen =createEligibleWomen(NUMBER_OF_COUPLES);        
-        System.out.println();createPreferences(eligibleMen, eligibleWomen);
-        createPreferences(eligibleWomen, eligibleMen);
+import java.io.*;
+
+public class stableSol {
+
+    private int numCouples = 0;
+    private static LinkedList eligibleMen;
+    private static LinkedList eligibleWomen;
+
+    static LinkedList createEligibleMen(int number, Scanner input) {
+        LinkedList men = new LinkedList();
+        for (int i = 1; i <= number; i++)
+        men.add(new Man(input.next()));
+        return men;
+    }
+
+    static LinkedList createEligibleWomen(int number, Scanner input) {
+        LinkedList women = new LinkedList();
+        for (int i = 1; i <= number; i++)women.add(new Woman(input.next()));
+        return women;
+    }
+
+    static void createPreferences(LinkedList a, LinkedList b, Scanner input) {
+        Iterator it = a.listIterator();
+        while (it.hasNext()) {
+            Person p = (Person) it.next();
+            Rankings r = p.getRankings();
+            r.addAll(b);
+            System.out.println("Whatare the preferences of " + p.name + "? (Input numericposition of persons)");
+            int n = r.size();
+            for (int i = 0; i < n; i++) {
+                int loc = input.nextInt() -1;
+                r.add(r.get(loc)); 
+                // put it at the back
+            }
+            for (int i = 0; i < n; i++)r.removeFirst();
+        }
+    }  
+
+    public static void main(String[] args) throws FileNotFoundException{
+        System.out.print("Welcome to the Gale-Shapley Machine\n");
+        Scanner inputMen = new Scanner (new File(args[0]));
+        Scanner inputWomen = new Scanner (new File(args[1]));
+
+        int numCouples = inputMen.nextInt();                
+
+        System.out.println("# Couples: " + numCouples);
+
+        eligibleMen = createEligibleMen(numCouples, inputMen);                
+        eligibleWomen = createEligibleWomen(numCouples, inputWomen);        
+
+        createPreferences(eligibleMen, eligibleWomen, inputMen);
+        createPreferences(eligibleWomen, eligibleMen, inputWomen);
+
         SocialRegister sr = new SocialRegister(eligibleMen,eligibleWomen);
         System.out.println(sr);
         while (sr.eligibleMenExist()) {
@@ -16,38 +59,6 @@ public class StableMarriage {
             System.out.println(sr);
         }
     }
-    
-    static LinkedList createEligibleMen(int number) {
-        System.out.println("What are the names of the men? (Press Enter to submit a name)");
-        LinkedList men = new LinkedList();
-        Scanner input = new Scanner (System.in);
-        for (int i = 1; i <= number; i++)men.add(new Man(input.next()));
-        return men;
-    }
-        static LinkedList createEligibleWomen(int number) {
-            System.out.println("What are the names of the women? (Press Enter to submit aname)");
-            LinkedList women = new LinkedList();
-            Scanner input = new Scanner (System.in);
-            for (int i = 1; i <= number; i++)women.add(new Woman(input.next()));
-            return women;
-        }
-        static void createPreferences(LinkedList a, LinkedList b) {Iterator it = a.listIterator();
-
-    while (it.hasNext()) {
-        Person p = (Person) it.next();
-        Rankings r = p.getRankings();
-        r.addAll(b);
-        System.out.println("Whatare the preferences of " + p.name + "? (Input numericposition of persons)");
-        Scanner input = new Scanner (System.in);
-        int n = r.size();
-        for (int i = 0; i < n; i++) {
-            int loc = input.nextInt() -1;
-            r.add(r.get(loc)); 
-            // put it at the back
-        }
-        for (int i = 0; i < n; i++)r.removeFirst();
-    }
-}
 }
 
 class SocialRegister {
