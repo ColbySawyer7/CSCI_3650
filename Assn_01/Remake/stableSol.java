@@ -1,66 +1,6 @@
 import java.util.*;
 import java.io.*;
 
-public class stableSol {
-
-    private int numCouples = 0;
-    private static LinkedList eligibleMen;
-    private static LinkedList eligibleWomen;
-
-    static LinkedList createEligibleMen(int number, Scanner input) {
-        LinkedList men = new LinkedList();
-        for (int i = 1; i <= number; i++)
-        men.add(new Man(input.next()));
-        return men;
-    }
-
-    static LinkedList createEligibleWomen(int number, Scanner input) {
-        LinkedList women = new LinkedList();
-        for (int i = 1; i <= number; i++)women.add(new Woman(input.next()));
-        return women;
-    }
-
-    static void createPreferences(LinkedList a, LinkedList b, Scanner input) {
-        Iterator it = a.listIterator();
-        while (it.hasNext()) {
-            Person p = (Person) it.next();
-            Rankings r = p.getRankings();
-            r.addAll(b);
-            System.out.println("Whatare the preferences of " + p.name + "? (Input numericposition of persons)");
-            int n = r.size();
-            for (int i = 0; i < n; i++) {
-                int loc = input.nextInt() -1;
-                r.add(r.get(loc)); 
-                // put it at the back
-            }
-            for (int i = 0; i < n; i++)r.removeFirst();
-        }
-    }  
-
-    public static void main(String[] args) throws FileNotFoundException{
-        System.out.print("Welcome to the Gale-Shapley Machine\n");
-        Scanner inputMen = new Scanner (new File(args[0]));
-        Scanner inputWomen = new Scanner (new File(args[1]));
-
-        int numCouples = inputMen.nextInt();                
-
-        System.out.println("# Couples: " + numCouples);
-
-        eligibleMen = createEligibleMen(numCouples, inputMen);                
-        eligibleWomen = createEligibleWomen(numCouples, inputWomen);        
-
-        createPreferences(eligibleMen, eligibleWomen, inputMen);
-        createPreferences(eligibleWomen, eligibleMen, inputWomen);
-
-        SocialRegister sr = new SocialRegister(eligibleMen,eligibleWomen);
-        System.out.println(sr);
-        while (sr.eligibleMenExist()) {
-            sr.getFirstEligible().makeProposal();
-            System.out.println(sr);
-        }
-    }
-}
-
 class SocialRegister {
     public static SocialRegister defaultRegister; 
     // singleton pattern
@@ -174,6 +114,66 @@ class Woman extends Person {
         if (preferences.contains(m)) {
             SocialRegister.defaultRegister.createEngagement(this,m);
             preferences.trim(m);
+        }
+    }
+}
+
+public class stableSol {
+
+    private int numCouples = 0;
+    private static LinkedList eligibleMen;
+    private static LinkedList eligibleWomen;
+
+    static LinkedList createEligibleMen(int number, Scanner input) {
+        LinkedList men = new LinkedList();
+        for (int i = 1; i <= number; i++)
+        men.add(new Man(input.next()));
+        return men;
+    }
+
+    static LinkedList createEligibleWomen(int number, Scanner input) {
+        LinkedList women = new LinkedList();
+        for (int i = 1; i <= number; i++)women.add(new Woman(input.next()));
+        return women;
+    }
+
+    static void createPreferences(LinkedList a, LinkedList b, Scanner input) {
+        Iterator it = a.listIterator();
+        while (it.hasNext()) {
+            Person p = (Person) it.next();
+            Rankings r = p.getRankings();
+            r.addAll(b);
+            System.out.println("Whatare the preferences of " + p.name + "? (Input numericposition of persons)");
+            int n = r.size();
+            for (int i = 0; i < n; i++) {
+                int loc = input.nextInt() -1;
+                r.add(r.get(loc)); 
+                // put it at the back
+            }
+            for (int i = 0; i < n; i++)r.removeFirst();
+        }
+    }  
+
+    public static void main(String[] args) throws FileNotFoundException{
+        System.out.print("Welcome to the Gale-Shapley Machine\n");
+        Scanner inputMen = new Scanner (new File(args[0]));
+        Scanner inputWomen = new Scanner (new File(args[1]));
+
+        int numCouples = inputMen.nextInt();                
+
+        System.out.println("# Couples: " + numCouples);
+
+        eligibleMen = createEligibleMen(numCouples, inputMen);                
+        eligibleWomen = createEligibleWomen(numCouples, inputWomen);        
+
+        createPreferences(eligibleMen, eligibleWomen, inputMen);
+        createPreferences(eligibleWomen, eligibleMen, inputWomen);
+
+        SocialRegister sr = new SocialRegister(eligibleMen,eligibleWomen);
+        System.out.println(sr);
+        while (sr.eligibleMenExist()) {
+            sr.getFirstEligible().makeProposal();
+            System.out.println(sr);
         }
     }
 }

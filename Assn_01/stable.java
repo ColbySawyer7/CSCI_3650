@@ -11,9 +11,11 @@ public class stable {
     class Person {
         String name;
         String[] preferences;
-        Person(String name, String[] preferences) {
+        Boolean engaged;
+        Person(String name, String[] preferences, Boolean engaged) {
             this.name = name;
             this.preferences = preferences;
+            this.engaged = false;
         }
         String[] getPref() {
             return preferences;
@@ -21,53 +23,80 @@ public class stable {
         public String toString() {
             return name;
         }
+        Boolean isEngaged(){
+            return engaged;
+        }
+        void proposal(){
+            this.engaged = true;
+        }
+        void endEngagement(){
+            this.engaged = false;
+        }
     }
     
     class Man extends Person {
+        Woman engagedTo;
         Man(String name, String[] preferences) {
-            super(name, preferences);
+            super(name, preferences, false);
+            this.engagedTo = null;
         }
-
-        Man newMan(String name, String[] pref){
-            return new Man(name,pref);
+        void getEngaged(Woman woman){
+            this.engagedTo = woman;
+            this.engaged = true;
         }
     }
     class Woman extends Person {
+        Man engagedTo;
         Woman(String name, String[] preferences) {
-            super(name, preferences);
+            super(name, preferences, false);
+            this.engagedTo = null;
         }
-    }
-
-//LinkedLists to store member information
-    private static LinkedList<Man> boyList = new LinkedList<Man>();
-    private Woman[] girlList = new Woman[100];
-
-    // Find Number of Members
-    private int boyCount;
-    private int girlCount;
-
-    // private static LinkedList<String> unmatchedMem;
-    // private static String[] marriage;
-
-    // ===================================================
-    // Wedding (Add to Seperate Marriage Array)
-    // ===================================================
-    private static Man addMan(String name, String[] pref){
-        return new Man(name, pref);
-    }
-
-    // ===================================================
-    // Wedding (Add to Seperate Marriage Array)
-    // ===================================================
-    public static void wedding(String man, String woman) {
-        // marriage[marriage.length] = "Man: " + man + " Woman: " + woman;
+        void getEngaged(Man man){
+            this.engagedTo = man;
+            this.engaged = true;
+        }
     }
 
     // ===================================================
     // Perform Gale-Shapley
     // ===================================================
-    public static void galeShapley(LinkedList<String> men, String[] women) {
+    public static LinkedList<String> galeShapley(LinkedList<Man> singleMen, Woman[] singleWomen) {
+        //While there exists a single man who still has a women to propose to
+            //first woman on mans list who he hasnt proposed to
+            //if she is single then they become engaged (add to return var)
+            //else
+                //if she prefers m to another man2 (who she is engaged to)
+                    //she becomes engaged to m and man2 goes back to being single
+                //else 
+                    //she and m2 stay engaged
+        LinkedList<String> pairs = new LinkedList<String>();;
 
+        while(!singleMen.isEmpty()){
+            Man manSearching = singleMen.getFirst();
+            String[] manPref = manSearching.getPref();
+            for(int x = 0; x < manPref.length; x++){
+                String womanName = manPref[x];
+                Woman woman = singleWomen[Arrays.asList(singleWomen).indexOf(womanName.toString())];
+                if(!woman.isEngaged()){
+                    pairs.add(manSearching.name + " " + womanName);
+                }
+                else{
+                    String[] womanPref = woman.getPref();
+                    final int newMan = Arrays.asList(womanPref).indexOf(manSearching.name);
+                    Man currentMan = woman.engagedTo;
+                    final int oldMan = Arrays.asList(womanPref).indexOf(currentMan.name);
+                    if(newMan < oldMan){
+                        pairs.add(manSearching.name + " " + womanName);
+                        manSearching.getEngaged(woman);
+                        woman.getEngaged(manSearching);
+
+                        singleMen.remove(manSearching);
+                        singleMen.add(currentMan);
+                    }
+                }
+            }
+        }
+        return pairs;
     }
     // ===================================================
     // Create and Print to File
@@ -84,52 +113,53 @@ public class stable {
         int girlCount = 0;
         int boyCount = 0;
 
-        System.out.println("Limit for Members: 100");
         Scanner boyScanner = new Scanner(new File(args[0]));
-        while (boyScanner.hasNextLine()) { // Read while File has next line
-            // Read Boys file
-            // Debug System.out.println(boy);
-            String boy = boyScanner.nextLine();
-            if (boyCount == 0) {// First Item
-                boyCount = Integer.parseInt(boy);
-            } else {
-                // fullLine Holds entire Line broken up by space (Man + Preferences)
-                String[] fullLine = boy.split("\\s+");
-                String[] preferences = new String[100];
-                int y = 0;
-                for (int x = 1; x < fullLine.length; x++) {
-                    // Create a new woman and append to preferences based on list from boy
-                    preferences[y] = fullLine[x];
-                }
-                // Debug
-                System.out.println("Man Created: " + fullLine[0]);
-                boyList.add(addMan(fullLine[0], preferences));
-            }
-            if(boyCount > 100){
-                System.out.println("ERROR: MORE THAN MAX MEMBERS (100)");
-            }
-        }
-/*
         Scanner girlScanner = new Scanner(new File(args[1]));
-        while(girlScanner.hasNextLine()){ //Read while File has next line
-            //Read Girls File
-            String girl = girlScanner.nextLine();
-            //Debug System.out.println(girl);
-            girlList[girlCount] = girl; 
-            girlCount++;
-            if(girlCount > 100){
-                System.out.println("ERROR: MORE THAN MAX MEMBERS (100)");
+//      Scanner outputScanner = new Scanner( new File(args[2]));
+
+        //Retrieve Size of Lists
+        boyCount = boyScanner.nextInt();
+        girlCount = girlScanner.nextInt();
+
+        LinkedList<Man> unMatchedMen = new LinkedList<Man>();
+        Woman[] unMatchedWomen = new Woman[girlCount];
+
+        //DEBUG System.out.println("Boys:" + boyCount + "\tGirls: " + girlCount);
+        
+        LinkedList<Man> men = new LinkedList<Man>();
+        String manName;
+        String[] manPref;
+        while(boyScanner.hasNextLine()){//Retrieve Each Man and Preferences
+            manName = boyScanner.next();
+            manPref = new String[girlCount];
+            System.out.println("Man Added: " + manName);
+            for(int x = 0; x < girlCount; x++){
+                manPref[x] = boyScanner.next();
+                //DEBUG System.out.println("Woman Added:" + manPref[x]);
             }
         }
-        //Debug  System.out.println("Loading Complete");
-        //numBoys = Integer.parseInt(boyList.getFirst());
-        //numGirls = Integer.parseInt(girlList[0]);
+        //men.add(new Man(manName,pref));
 
+        Woman[] girlList = new Woman[girlCount];
 
-        //Debug System.out.println("Boys: " + numBoys + "\t" + "Girls: " + numGirls);
-        //Start Algorithm with First Man
+        String womanName;
+        String[] womanPref;
+        while(girlScanner.hasNextLine()){//Retrieve Each Woman and Preferences
+            womanName = girlScanner.next();
+            womanPref = new String[boyCount];
+            //DEBUG System.out.println("Woman Added: " + womanName);
+            for(int x = 0; x < girlCount; x++){
+                womanPref[x] = girlScanner.next();
+                //DEBUG System.out.println("Man Added:" + womanPref[x]);
+            }
+        }
 
-*/
+        //DEBUG 
+        System.out.println("Stable Pairs");
+        LinkedList<String> marriages = galeShapley(unMatchedMen, unMatchedWomen);
+
+        marriages.forEach(System.out::println);
+        System.out.println();
 
     }
 }
