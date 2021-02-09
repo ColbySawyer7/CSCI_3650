@@ -57,6 +57,42 @@ public class stable {
         }
     }
 
+  public static LinkedList<Man> addMen(Scanner boyScanner, int girlCount){
+        LinkedList<Man> men = new LinkedList<Man>();
+        String manName;
+        String[] manPref;
+        while(boyScanner.hasNextLine()){//Retrieve Each Man and Preferences
+            manName = boyScanner.next();
+            manPref = new String[girlCount];
+            System.out.println("Man Added: " + manName);
+            for(int x = 0; x < girlCount; x++){
+                manPref[x] = boyScanner.next();
+                //DEBUG System.out.println("Woman Added:" + manPref[x]);
+            }
+            Man man = new Man(manName,manPref);
+            men.add(man);
+        }
+        return men;
+    }
+
+    public static Woman[] addWoman(Scanner girlScanner, int boyCount, int girlCount){
+        Woman[] women = new Woman[girlCount];
+        String womanName;
+        String[] womanPref;
+        int womenCount = 0;
+        while(girlScanner.hasNextLine()){//Retrieve Each Woman and Preferences
+            womanName = girlScanner.next();
+            womanPref = new String[boyCount];
+            //DEBUG System.out.println("Woman Added: " + womanName);
+            for(int x = 0; x < girlCount; x++){
+                womanPref[x] = girlScanner.next();
+                //DEBUG System.out.println("Man Added:" + womanPref[x]);
+            }
+            women[womenCount] = new Woman(womanName, womanPref);
+            womenCount++;
+        }
+        return women;
+    }
     // ===================================================
     // Perform Gale-Shapley
     // ===================================================
@@ -91,7 +127,7 @@ public class stable {
                         woman.getEngaged(manSearching);
 
                         singleMen.remove(manSearching);
-                        singleMen.add(currentMan);
+                        singleMen.push(currentMan);
                     }
                 }
             }
@@ -115,7 +151,6 @@ public class stable {
 
         Scanner boyScanner = new Scanner(new File(args[0]));
         Scanner girlScanner = new Scanner(new File(args[1]));
-//      Scanner outputScanner = new Scanner( new File(args[2]));
 
         //Retrieve Size of Lists
         boyCount = boyScanner.nextInt();
@@ -126,40 +161,36 @@ public class stable {
 
         //DEBUG System.out.println("Boys:" + boyCount + "\tGirls: " + girlCount);
         
-        LinkedList<Man> men = new LinkedList<Man>();
-        String manName;
-        String[] manPref;
-        while(boyScanner.hasNextLine()){//Retrieve Each Man and Preferences
-            manName = boyScanner.next();
-            manPref = new String[girlCount];
-            System.out.println("Man Added: " + manName);
-            for(int x = 0; x < girlCount; x++){
-                manPref[x] = boyScanner.next();
-                //DEBUG System.out.println("Woman Added:" + manPref[x]);
-            }
-        }
-        //men.add(new Man(manName,pref));
+        //unMatchedMen = addMen(boyScanner, girlCount);
+        //unMatchedWomen = addWoman(girlScanner, boyCount, girlCount);
+        //DEBUG System.out.println("Stable Pairs");
 
-        Woman[] girlList = new Woman[girlCount];
-
-        String womanName;
-        String[] womanPref;
-        while(girlScanner.hasNextLine()){//Retrieve Each Woman and Preferences
-            womanName = girlScanner.next();
-            womanPref = new String[boyCount];
-            //DEBUG System.out.println("Woman Added: " + womanName);
-            for(int x = 0; x < girlCount; x++){
-                womanPref[x] = girlScanner.next();
-                //DEBUG System.out.println("Man Added:" + womanPref[x]);
-            }
-        }
-
-        //DEBUG 
-        System.out.println("Stable Pairs");
         LinkedList<String> marriages = galeShapley(unMatchedMen, unMatchedWomen);
 
         marriages.forEach(System.out::println);
         System.out.println();
 
+        //File Output Handling
+        //File Creation
+        try{
+            File output = new File(args[2] + ".txt");
+            if (output.createNewFile()) {
+                //DEBUG System.out.println("File created: " + output.getName());
+                try {
+                    FileWriter outpuWriter = new FileWriter(args[2] + ".txt");
+                    outpuWriter.write(marriages.toString() + "END OF FILE");
+                    outpuWriter.close();
+                    //DEBUG System.out.println("Successfully wrote to the file.");
+                  } catch (IOException e) {
+                    System.out.println("ERROR: An error occurred.");
+                    e.printStackTrace();
+                  }
+            } else {
+                System.out.println("ERROR: File already exists.");
+            }
+        } catch (IOException e) {
+            System.out.println("ERROR: An error occurred.");
+            e.printStackTrace();
+        }
     }
 }
