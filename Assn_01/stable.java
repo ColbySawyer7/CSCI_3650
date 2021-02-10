@@ -1,4 +1,7 @@
 import java.util.*;
+
+import javax.xml.stream.events.EndElement;
+
 import java.io.*;
 //===================================================
 //      Assignment 01 - Gale-Shapley
@@ -6,97 +9,97 @@ import java.io.*;
 // by: Colby Sawyer- sawyerc17@students.ecu.edu
 // B01204512
 //===================================================
+
+class Person {
+    String name;
+    LinkedList<String> preferences;
+    Person(String name, LinkedList<String> pref) {
+        this.name = name;
+        this.preferences = pref;
+    }
+    LinkedList<String> getPref() {
+        return preferences;
+    }
+}
+
+class Man extends Person {
+    Woman fiance;
+    Boolean engaged;
+    Man(String name, LinkedList<String> pref) {
+        super(name,pref);
+        this.fiance = null;
+        this.engaged= false;
+    }
+    void getEngaged(Woman w){
+        this.fiance = w;
+        this.engaged = true;
+    }
+
+}
+class Woman extends Person {
+    Man fiance;
+    Boolean engaged;
+    Woman(String name, LinkedList<String> pref) {
+        super(name, pref);
+        this.fiance = null;
+        this.engaged = false;
+    }
+
+    Man considerProposal(Man m) {
+        System.out.println("Engaged:" + engaged);
+        System.out.println("Man Asking:" + m.name);
+        if(fiance != null){
+            System.out.println("Fiance Currently: "+ fiance.name);
+        }
+        Man fianceStart = this.fiance;
+
+        if (engaged && preferences.contains(m.name) && preferences.indexOf(m.name) < preferences.indexOf(fianceStart.name)) { //Should replace old engagement
+            this.fiance = m;
+            this.engaged = true;
+            m.getEngaged(this);
+            System.out.println("Chosen Over: " + fianceStart.name);
+            return fianceStart;
+        }
+        else if(!engaged || fiance == null){ //Single
+            this.fiance = m;
+            this.engaged = true;
+            m.getEngaged(this);
+            System.out.println("She was single");
+            return m;
+        }
+        else{
+            System.out.println("Better Luck next time");
+            return m;
+        }
+    }
+}
+
 public class stable {
 
-    class Person {
-        String name;
-        String[] preferences;
-        Boolean engaged;
-        Person(String name, String[] preferences, Boolean engaged) {
-            this.name = name;
-            this.preferences = preferences;
-            this.engaged = false;
-        }
-        String[] getPref() {
-            return preferences;
-        }
-        public String toString() {
-            return name;
-        }
-        Boolean isEngaged(){
-            return engaged;
-        }
-        void proposal(){
-            this.engaged = true;
-        }
-        void endEngagement(){
-            this.engaged = false;
-        }
+    public static LinkedList<String> getMarried(String mName, String wName){
+        LinkedList<String> marriage = new LinkedList<String>();
+        marriage.add(mName);
+        marriage.add(wName);
+
+        return marriage;
     }
-    
-    class Man extends Person {
-        Woman engagedTo;
-        Man(String name, String[] preferences) {
-            super(name, preferences, false);
-            this.engagedTo = null;
+    public static Woman findWoman(Woman[] women, String name){
+        Woman woman = null;
+        for(int x = 0; x < women.length; x++){
+            //DEBUGSystem.out.println("WomenArray @: " + women[x].name + " WomanSearch: " + name);
+            if(women[x].name.equals(name)){
+                //DEBUGSystem.out.println("Its TRUE");
+                woman = women[x];
+                return woman;
+            }
         }
-        void getEngaged(Woman woman){
-            this.engagedTo = woman;
-            this.engaged = true;
-        }
-    }
-    class Woman extends Person {
-        Man engagedTo;
-        Woman(String name, String[] preferences) {
-            super(name, preferences, false);
-            this.engagedTo = null;
-        }
-        void getEngaged(Man man){
-            this.engagedTo = man;
-            this.engaged = true;
-        }
+        return woman;
     }
 
-  public static LinkedList<Man> addMen(Scanner boyScanner, int girlCount){
-        LinkedList<Man> men = new LinkedList<Man>();
-        String manName;
-        String[] manPref;
-        while(boyScanner.hasNextLine()){//Retrieve Each Man and Preferences
-            manName = boyScanner.next();
-            manPref = new String[girlCount];
-            System.out.println("Man Added: " + manName);
-            for(int x = 0; x < girlCount; x++){
-                manPref[x] = boyScanner.next();
-                //DEBUG System.out.println("Woman Added:" + manPref[x]);
-            }
-            Man man = new Man(manName,manPref);
-            men.add(man);
-        }
-        return men;
-    }
-
-    public static Woman[] addWoman(Scanner girlScanner, int boyCount, int girlCount){
-        Woman[] women = new Woman[girlCount];
-        String womanName;
-        String[] womanPref;
-        int womenCount = 0;
-        while(girlScanner.hasNextLine()){//Retrieve Each Woman and Preferences
-            womanName = girlScanner.next();
-            womanPref = new String[boyCount];
-            //DEBUG System.out.println("Woman Added: " + womanName);
-            for(int x = 0; x < girlCount; x++){
-                womanPref[x] = girlScanner.next();
-                //DEBUG System.out.println("Man Added:" + womanPref[x]);
-            }
-            women[womenCount] = new Woman(womanName, womanPref);
-            womenCount++;
-        }
-        return women;
-    }
     // ===================================================
     // Perform Gale-Shapley
     // ===================================================
-    public static LinkedList<String> galeShapley(LinkedList<Man> singleMen, Woman[] singleWomen) {
+    public static LinkedList<LinkedList<String>> galeShapley(LinkedList<Man> singleMen, Woman[] singleWomen) {
         //While there exists a single man who still has a women to propose to
             //first woman on mans list who he hasnt proposed to
             //if she is single then they become engaged (add to return var)
@@ -105,34 +108,56 @@ public class stable {
                     //she becomes engaged to m and man2 goes back to being single
                 //else 
                     //she and m2 stay engaged
-        LinkedList<String> pairs = new LinkedList<String>();;
+        LinkedList<LinkedList<String>> marriages = new LinkedList<LinkedList<String>>();
 
-        while(!singleMen.isEmpty()){
-            Man manSearching = singleMen.getFirst();
-            String[] manPref = manSearching.getPref();
-            for(int x = 0; x < manPref.length; x++){
-                String womanName = manPref[x];
-                Woman woman = singleWomen[Arrays.asList(singleWomen).indexOf(womanName.toString())];
-                if(!woman.isEngaged()){
-                    pairs.add(manSearching.name + " " + womanName);
-                }
-                else{
-                    String[] womanPref = woman.getPref();
-                    final int newMan = Arrays.asList(womanPref).indexOf(manSearching.name);
-                    Man currentMan = woman.engagedTo;
-                    final int oldMan = Arrays.asList(womanPref).indexOf(currentMan.name);
-                    if(newMan < oldMan){
-                        pairs.add(manSearching.name + " " + womanName);
-                        manSearching.getEngaged(woman);
-                        woman.getEngaged(manSearching);
+        LinkedList<Man> unmatchedMen = singleMen;
+        int index = 0;
 
-                        singleMen.remove(manSearching);
-                        singleMen.push(currentMan);
+        while(!unmatchedMen.isEmpty()){
+            Man singleMan = unmatchedMen.pop();
+            System.out.println("Man: " + singleMan.name);
+            LinkedList<String> pref = singleMan.preferences;
+            if(index < pref.size()){
+                String w = pref.get(index);
+                Woman woman = findWoman(singleWomen, w);
+                if(woman != null){
+                    Man result = woman.considerProposal(singleMan);
+
+                    if(result != singleMan){ // She said yes
+                        //DEBUG 
+                        System.out.println("She said yes");
+                        unmatchedMen.push(result);
+                        //singleMan.getEngaged(woman);
+                        unmatchedMen.remove(singleMan);
+                        LinkedList<String> marriageLicense = getMarried(result.name, woman.name);
+                        System.out.println("Marriage License: " + Arrays.toString(marriageLicense.toArray()));
+                        if(marriages.contains(marriageLicense)){ // Marriage Already Exists
+                            System.out.println("Found it");
+                            marriages.remove(marriageLicense);
+                        }else{
+                            System.out.println("No previous marriage");
+                            marriages.add(marriageLicense);
+                        }
+                    }else if(result == singleMan && result.engaged){// She was single and said yes
+                        System.out.println("She was single and said yes");
+                        unmatchedMen.remove(singleMan);
+                        LinkedList<String> marriageLicense = getMarried(result.name, woman.name);
+                        System.out.println("Marriage License: " + Arrays.toString(marriageLicense.toArray()));
+                        marriages.add(marriageLicense);
+                    }else{ // She said no
+                        //DEBUG 
+                        System.out.println("she said no");
+                        index++;
+                        singleMen.push(singleMan);
                     }
+                }else{
+                    //DEBUG 
+                    System.out.println("Women is null");
                 }
-            }
+         }
         }
-        return pairs;
+        return marriages;
+
     }
     // ===================================================
     // Create and Print to File
@@ -156,19 +181,45 @@ public class stable {
         boyCount = boyScanner.nextInt();
         girlCount = girlScanner.nextInt();
 
-        LinkedList<Man> unMatchedMen = new LinkedList<Man>();
-        Woman[] unMatchedWomen = new Woman[girlCount];
+        LinkedList<Man> singleMen = new LinkedList<Man>();
+        Woman[] singleWomen = new Woman[girlCount];
 
-        //DEBUG System.out.println("Boys:" + boyCount + "\tGirls: " + girlCount);
-        
-        //unMatchedMen = addMen(boyScanner, girlCount);
-        //unMatchedWomen = addWoman(girlScanner, boyCount, girlCount);
-        //DEBUG System.out.println("Stable Pairs");
+        //Read Each Man and his preferences
+        while(boyScanner.hasNext()){
+            String manInfo = boyScanner.nextLine();
+                String[] splitInfo = manInfo.split("\\s+");
+                LinkedList<String> pref = new LinkedList<String>();
+                for(int x = 1; x < splitInfo.length; x++){
+                    pref.add(splitInfo[x]);
+                }
+                Man man = new Man(splitInfo[0], pref);
+                singleMen.add(man);
+            
+        }
 
-        LinkedList<String> marriages = galeShapley(unMatchedMen, unMatchedWomen);
+        //Read Each Woman and her preferences
+        int currentMember = 0;
+        while(girlScanner.hasNextLine()){
+            String womanInfo = girlScanner.nextLine();
+                String[] splitInfo = womanInfo.split("\\s+");
+                if(splitInfo.length > 1){
+                    LinkedList<String> pref = new LinkedList<String>();
+                    for(int x = 1; x < splitInfo.length; x++){
+                        pref.add(splitInfo[x]);
+                    }
+                    //DEBUG System.out.println("Girl Added: " + splitInfo[0]);
+                    Woman woman = new Woman(splitInfo[0], pref);
+                    if(currentMember < girlCount){
+                        singleWomen[currentMember] = woman;
+                        //DEBUG System.out.println("Women Added: " + singleWomen[currentMember].name);
+                        currentMember++;
+                    }
+                } 
+        }
 
-        marriages.forEach(System.out::println);
-        System.out.println();
+
+        //Pass List of Single Men and Women to Gale-Shapley
+        LinkedList<LinkedList<String>> marriages = galeShapley(singleMen,singleWomen);
 
         //File Output Handling
         //File Creation
@@ -178,7 +229,7 @@ public class stable {
                 //DEBUG System.out.println("File created: " + output.getName());
                 try {
                     FileWriter outpuWriter = new FileWriter(args[2] + ".txt");
-                    outpuWriter.write(marriages.toString() + "END OF FILE");
+                    outpuWriter.write(Arrays.toString(marriages.toArray()) + "END OF FILE");
                     outpuWriter.close();
                     //DEBUG System.out.println("Successfully wrote to the file.");
                   } catch (IOException e) {
