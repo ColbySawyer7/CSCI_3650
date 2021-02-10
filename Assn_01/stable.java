@@ -34,6 +34,10 @@ class Man extends Person {
         this.fiance = w;
         this.engaged = true;
     }
+    void breakItOff(){
+        this.fiance = null;
+        this.engaged = false;
+    }
 
 }
 class Woman extends Person {
@@ -58,6 +62,7 @@ class Woman extends Person {
             this.engaged = true;
             m.getEngaged(this);
             System.out.println("Chosen Over: " + fianceStart.name);
+            fianceStart.breakItOff();
             return fianceStart;
         }
         else if(!engaged || fiance == null){ //Single
@@ -130,25 +135,27 @@ public class stable {
                         //singleMan.getEngaged(woman);
                         unmatchedMen.remove(singleMan);
                         LinkedList<String> marriageLicense = getMarried(result.name, woman.name);
-                        System.out.println("Marriage License: " + Arrays.toString(marriageLicense.toArray()));
+                        System.out.println("Old Marriage License: " + Arrays.toString(marriageLicense.toArray()));
                         if(marriages.contains(marriageLicense)){ // Marriage Already Exists
                             System.out.println("Found it");
                             marriages.remove(marriageLicense);
+                            marriages.add(getMarried(singleMan.name, woman.name));
                         }else{
                             System.out.println("No previous marriage");
-                            marriages.add(marriageLicense);
+                            marriages.add(getMarried(singleMan.name,woman.name));
                         }
                     }else if(result == singleMan && result.engaged){// She was single and said yes
+                        System.out.println("Test" + result.name);
                         System.out.println("She was single and said yes");
                         unmatchedMen.remove(singleMan);
                         LinkedList<String> marriageLicense = getMarried(result.name, woman.name);
-                        System.out.println("Marriage License: " + Arrays.toString(marriageLicense.toArray()));
+                        System.out.println(" New Marriage License: " + Arrays.toString(marriageLicense.toArray()));
                         marriages.add(marriageLicense);
                     }else{ // She said no
                         //DEBUG 
                         System.out.println("she said no");
                         index++;
-                        singleMen.push(singleMan);
+                        unmatchedMen.push(singleMan);
                     }
                 }else{
                     //DEBUG 
