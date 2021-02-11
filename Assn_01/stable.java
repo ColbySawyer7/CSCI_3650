@@ -32,8 +32,8 @@ class Person {
 // ====================================================================================
 // Man Class
 // ====================================================================================
-// Man class that holds a man's fiance (Woman),
-//      engaged (boolean True:Engaged); Person super 
+// Man class that holds a man's name, a man's preferences, man's fiance (Woman),
+//      and engaged (boolean True:Engaged); Person super 
 //      class
 // ====================================================================================
 class Man extends Person {
@@ -67,8 +67,8 @@ class Man extends Person {
 // ====================================================================================
 // Woman Class
 // ====================================================================================
-// Man class that holds a woman's fiance (Man),
-//      engaged (boolean True:Engaged); Person super 
+// Man class that holds a woman's name, womans's preferences, woman's fiance (Man),
+//      and engaged (boolean True:Engaged); Person super 
 //      class
 // ====================================================================================
 class Woman extends Person {
@@ -243,9 +243,11 @@ class Woman extends Person {
     // ====================================================================================
     public static void main(String args[]) throws FileNotFoundException {
 
+        //Hold the population size of each group
         int girlCount = 0;
         int boyCount = 0;
 
+        //Retrieve the input streams for each file
         Scanner boyScanner = new Scanner(new File(args[0]));
         Scanner girlScanner = new Scanner(new File(args[1]));
 
@@ -253,6 +255,7 @@ class Woman extends Person {
         boyCount = boyScanner.nextInt();
         girlCount = girlScanner.nextInt();
 
+        //Create Structurs to hold singleMen and singleWomen lists
         LinkedList<Man> singleMen = new LinkedList<Man>();
         Woman[] singleWomen = new Woman[girlCount];
 
@@ -292,8 +295,7 @@ class Woman extends Person {
         //Pass List of Single Men and Women to Gale-Shapley
         LinkedList<LinkedList<String>> marriages = galeShapley(singleMen,singleWomen);
 
-        //File Output Handling
-        //File Creation
+        //File Output Handling (Creation and Writing)
         try{
             File output = new File(args[2] + ".txt");
             if (output.createNewFile()) {
