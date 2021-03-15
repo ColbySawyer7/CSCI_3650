@@ -12,7 +12,7 @@ class DirectedGraph:
     # ====================================================================================
     # Described basic DirectedGraph Structure
     # num_verts holding number of vertices
-    # graph holding dictionary of lists to hold an adjacency list representation
+    # graph holding dictionary of lists to represent an adjacency list
     # ====================================================================================
     def __init__(self, num_verts):
         self.num_verts = num_verts
@@ -27,8 +27,8 @@ class DirectedGraph:
     # add_edge adds an edge to the DirectedGraph
     # u --> v
     # ====================================================================================
-    def add_edge(self, u, v):
-        self.graph[u].append(v)
+    def add_edge(self, x, y):
+        self.graph[x].append(y)
         #print(self.graph)
 
     # ====================================================================================
@@ -39,9 +39,9 @@ class DirectedGraph:
     # ====================================================================================
     def dfs(self, v, visited, stack):
         visited.append(v)
-        for i in self.graph[v]:
-            if i not in visited:
-                self.dfs(i, visited, stack)
+        for x in self.graph[v]:
+            if x not in visited:
+                self.dfs(x, visited, stack)
         stack.append(v)
 
     # ====================================================================================
@@ -52,9 +52,9 @@ class DirectedGraph:
     # ====================================================================================
     def invert_graph(self):
         graph_invert = DirectedGraph(self.num_verts)
-        for i in self.graph:
-            for j in self.graph[i]:
-                graph_invert.add_edge(j, i)
+        for x in self.graph:
+            for y in self.graph[x]:
+                graph_invert.add_edge(y, x)
         return graph_invert
 
     # ====================================================================================
@@ -73,20 +73,23 @@ class DirectedGraph:
         stack = []
         sccList = []
         visited = [] # Visited must be empty before DFS
-        for i in range(self.num_verts):
-            if i not in visited:
-                self.dfs(i, visited, stack)
 
+        # Step 1
+        for x in range(self.num_verts):
+            if x not in visited:
+                self.dfs(x, visited, stack)
+
+        # Step 2
         # Compute inverse graph and store as g_t
         g_t = self.invert_graph()
         visited.clear() # Visited must be empty before DFS
-        # print("Compiling SCC LIST NOW")
-        # Now process all vertices in order defined by Stack
+
+        # Step 3
         while stack:
             scc = []
-            i = stack.pop()
-            if i not in visited:
-                g_t.dfs(i, visited, scc)
+            x = stack.pop()
+            if x not in visited:
+                g_t.dfs(x, visited, scc)
                 sccList.append(scc)
 
         return sccList
